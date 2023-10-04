@@ -10,7 +10,6 @@ from components.utils import *
 window_height = 400
 window_width = 600
 
-
 def page(mainframe: tk.Frame):
 
     mainframe.children['loginframe'].forget()
@@ -137,39 +136,32 @@ def page(mainframe: tk.Frame):
         user_frame.pack(side='left')
         user_frame.grid_propagate(False)
 
-        user_pick_label = tk.Label(
+        
+        setpass_label = tk.Label(
             user_frame,
-            text='Nhập email cần gửi:',
+            text='Nhập mật khẩu:',
             font=('Verdana',8)
         )
-        user_pick_entry = tk.Entry(
+        setpass_entry = tk.Entry(
             user_frame,
             width=25,
-            font=('Verdana',8)
+            font=('Verdana',8),  show='*'
         )
-        """
         def submit():
-            email = user_pick_entry.get().strip()
-            if not get_user(email):
-                messagebox.showerror(
-                    title='Lỗi',
-                    message='Không tồn tại người dùng này!'
-                
-                )
-            else:
-                if encrypt_file(file_name.get(), email):
-                    messagebox.showinfo(title='CHÚC MỪNG', message='Mã hoá và gửi thành công')
-                else: messagebox.showerror(title='LỖI', message='Mã hoá không thành công')
+            password = setpass_entry.get().strip()
+            if encrypt_file(file_name.get(), password):
+                messagebox.showinfo(title='CHÚC MỪNG', message='Đặt mật khẩu và mã hóa file thành công')
+            else: messagebox.showerror(title='LỖI', message='Mã hoá không thành công')
         submit_button = tk.Button(
             user_frame,
             text='Xác nhận',
             width=10,
             command=submit
         )
-        """
-        user_pick_label.grid(row=0, column=0, pady=5)
-        user_pick_entry.grid(row=1, column=0, pady=5, sticky='w')
-        #submit_button.grid(row=2,column=0, pady=5)
+
+        setpass_label.grid(row=0, column=0, pady=5)
+        setpass_entry.grid(row=1, column=0, pady=5, sticky='w')
+        submit_button.grid(row=2,column=0, pady=5)
 
     def decrypt_receive():
         user_dir = 'data/'
@@ -206,9 +198,19 @@ def page(mainframe: tk.Frame):
             command=get_file,
             anchor='w'
         )
-        """
+        inppass_label = tk.Label(
+            user_page_content_frame_right,
+            text='Nhập mật khẩu:',
+            font=('Verdana',8)
+        )
+        inppass_entry = tk.Entry(
+            user_page_content_frame_right, 
+            width=25,
+            font=('Verdana',8),  show='*'
+        )
         def submit():
-            if decrypt_file(file_name.get(), user.email):
+            password = inppass_entry.get().strip()
+            if decrypt_file(file_name.get(), password):
                 messagebox.showinfo(title='CHÚC MỪNG', message='Giải mã thành công')
             else: messagebox.showerror(title='LỖI', message='Giải mã không thành công')
         
@@ -218,10 +220,11 @@ def page(mainframe: tk.Frame):
             width=10,
             command=submit
         )
-        """
         file_choose_label.grid(row=0, column=0, pady=5, sticky='w')
         file_choose_button.grid(row=1, column=0, pady=5, sticky='w')
         file_name_display.grid(row=2, column=0, columnspan=1, pady=5, sticky='w')
-        #submit_button.grid(row=3,column=0, pady=5)
+        inppass_label.grid(row=2, column=1, pady=5)
+        inppass_entry.grid(row=3, column=1, pady=5, sticky='w')
+        submit_button.grid(row=4,column=1, pady=5)
     encrypt_send_button['command']=encrypt_send_file
     decrypt_receive_button['command']=decrypt_receive
