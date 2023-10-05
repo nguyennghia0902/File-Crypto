@@ -75,9 +75,9 @@ def decrypt_file(file_in, passinput):                     #5.4
     
     iv = fileIn.read(bs)
 
-    cont = fileIn.read(289-33)
     check = hash_password(passinput)
-    pass_hashed = cont[:len(check)].decode()
+    cont = fileIn.read(len(check))
+    pass_hashed = cont.decode()
 
     if validate_password(passinput, pass_hashed):
       key = get_digest(pass_hashed)
