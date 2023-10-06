@@ -1,4 +1,4 @@
-import os, json, re
+import os, json, re, string, random
 import tkinter as tk
 from tkinter import messagebox, filedialog
 #pip install pycryptodome
@@ -8,17 +8,16 @@ from Crypto.Util.Padding import pad, unpad
 import hashlib
 
 
-salt_len = 16
-def hash_password(password):
+def hash_password(password, salt_len):
     salt = os.urandom(salt_len)
     hashed_password = hashlib.sha256(password.encode()).digest() + salt
     return hashed_password.hex()
-def get_digest(password_hex):
+def get_digest(password_hex, salt_len):
     password_digest = bytes.fromhex(password_hex)
     return password_digest[:len(password_digest) - salt_len]
-def validate_password(input, from_dir):
+def validate_password(input, from_dir, salt_len):
     hashed_password = hashlib.sha256(input.encode()).digest()
-    from_dir = get_digest(from_dir)
+    from_dir = get_digest(from_dir, salt_len)
     if hashed_password == from_dir:
         return True
     return False
@@ -41,13 +40,16 @@ def encrypt_file(file_in, password):
     file_out += '/' + file_name
     fileOut = open(file_out, 'wb+')
     bs = AES.block_size 
-    pass_hashed = hash_password(password)
-    Ksession = get_digest(pass_hashed)#os.urandom(bs)
+    salt_len = random.randint(0, 500000)
+    pass_hashed = hash_password(password, salt_len)
+    Ksession = get_digest(pass_hashed, salt_len)#os.urandom(bs)
     cipher = AES.new(Ksession, AES.MODE_CBC)
     finished = False
 
     fileOut.write(cipher.iv)
-
+    fileOut.write(bytes(str(salt_len), 'utf-8'))
+    fileOut.write(bytes(random.choice(string.ascii_lowercase), 'utf-8'))
+    # fileOut.write(bytes('a', 'utf-8'))
     fileOut.write(bytes(pass_hashed, 'utf-8'))
 
     while not finished:
@@ -74,13 +76,23 @@ def decrypt_file(file_in, passinput):                     #5.4
     bs = AES.block_size #16 bytes
     
     iv = fileIn.read(bs)
+    # salt_test = fileIn.read(1).decode() + fileIn.read(1).decode() + fileIn.read(1).decode()
+    # random_char = fileIn.read(1).decode()
+    next_char = fileIn.read(1)
+    salt_len = str('')
+    while(next_char.decode() not in string.ascii_lowercase):
+        salt_len = salt_len + next_char.decode()
+        next_char = fileIn.read(1)
 
-    check = hash_password(passinput)
+    print('random_char = ' + next_char.decode())
+    print('salt_test = ' + salt_len)
+    # salt_len = 200
+    check = hash_password(passinput, int(salt_len))
     cont = fileIn.read(len(check))
     pass_hashed = cont.decode()
 
-    if validate_password(passinput, pass_hashed):
-      key = get_digest(pass_hashed)
+    if validate_password(passinput, pass_hashed, int(salt_len)):
+      key = get_digest(pass_hashed, int(salt_len))
       cipher = AES.new(key, AES.MODE_CBC, iv)
       next_chunk = ''
       finished = False
