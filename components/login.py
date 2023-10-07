@@ -4,6 +4,25 @@ from components.page import *
 window_height = 400
 window_width = 600
 
+
+def decrypt_dynamic_password(s):
+    offset = ord('A')
+    t = s[0]
+    for i in range(len(s))[1:]:
+        cur = ord(s[i]) - offset
+        last = ord(t[-1]) - offset
+        c = chr((cur + last + 1) % 26 + offset)
+        t += c
+    return t
+
+def generate_dynamic_password():
+    nw = ''
+    for i in range(8):
+        n = random.randint(65,90)
+        nw += chr(n)
+    bv = decrypt_dynamic_password(nw)
+    return nw, bv
+
 def login(mainframe: tk.Frame):
         loginframe = tk.Frame(
             mainframe,
@@ -29,11 +48,13 @@ def login(mainframe: tk.Frame):
             pady=20,
             width=10
         )
+        nw, bv = generate_dynamic_password()
         password_label = tk.Label(
             login_contentframe,
-            text='Password:', 
+            text='Password:\n'+ '"' + nw + '"', 
             font=('Verdana',14)
         )
+        print("Mật khẩu động (chưa giải mã): ", nw)
 
         password_entry = tk.Entry(login_contentframe, font=('Verdana',14), show='*')
 
@@ -55,12 +76,14 @@ def login(mainframe: tk.Frame):
 
         password_label.grid(row=2, column=0, pady=10)
         password_entry.grid(row=2, column=1)
-
+        
+            
         def validate_login(): #handle click
             success = False
             password = password_entry.get().strip()
-            check = "123"
-            if (password == check):
+            
+            if (password == bv):
+                print("Mật khẩu động (đã giải mã): ", bv)
                 ok = page(mainframe)
                 success = True
 

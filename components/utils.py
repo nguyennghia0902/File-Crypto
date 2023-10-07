@@ -38,7 +38,7 @@ def read_size_bs_bytes(size, data):
         offset += chunk_size
         yield chunk
 
-def encrypt_file(file_in, password): 
+def _encrypt_file(file_in, password): 
     file = open(file_in, 'rb')
     data = file.read()
     file.close()
@@ -50,7 +50,9 @@ def encrypt_file(file_in, password):
     file = open(name, 'wb')
     salt_len = random.randint(0, 500000)
     bs = AES.block_size 
-    pass_hashed = hash_password(password,salt_len)
+    pass_hashed = hash_password(password, salt_len)
+    print("Mật khẩu file sau khi hash:", pass_hashed)
+    print("Kích thước mật khẩu file sau khi hash:", len(pass_hashed))
     Ksession = get_digest(pass_hashed, salt_len)  #os.urandom(bs)
     cipher = AES.new(Ksession, AES.MODE_CBC)
     finished = False
@@ -69,9 +71,10 @@ def encrypt_file(file_in, password):
             file.write(cipher.encrypt(chunk))   
         pass         
     file.close()
+    print("Kích thước của file sau khi mã hóa: ",os.path.getsize(name))
     return True
     
-def decrypt_file(file_in, passinput):  
+def _decrypt_file(file_in, passinput):  
     file = open(file_in, 'rb')
     file_name = file_in.split('/')[-1]
     name = file_name
@@ -95,7 +98,6 @@ def decrypt_file(file_in, passinput):
         while(next_char.decode() not in string.ascii_lowercase):
             salt_len = salt_len + next_char.decode()
             next_char = file.read(1)
-        
         
         check = hash_password(passinput, int(salt_len))
         passhase = file.read(len(check))
@@ -127,3 +129,5 @@ def decrypt_file(file_in, passinput):
     file.close()
     return False                 
     
+encrypt_file = _encrypt_file
+decrypt_file = _decrypt_file
