@@ -68,33 +68,24 @@ def encrypt_file(file_in, password):
         pass         
     file.close()
     return True
+
+def decrypt_file(file_in, passinput):                     #5.4
+    fileIn = open(file_in, 'rb')
+    matches = re.findall(r'/\w+',file_in)
+    file_name = matches[-1]
+    file_name = file_name[1:]
+    if file_name.find('_encrypted') != -1:
+        file_name.replace('_encrypted','')
+    file_out = file_in.replace(file_name, file_name + '_decrypted')
+    fileOut = open(file_out, 'wb+')
+    bs = AES.block_size #16 bytes
     
-def decrypt_file(file_in, passinput):  
-    file = open(file_in, 'rb')
-    file_name = file_in.split('/')[-1]
-    name = file_name
-    addr = file_in.split('/')[:-1]
-    file_out = '/'.join(addr)
-    if '.' in file_name:
-        full = file_name.split('.')
-        name = full[0]
-        exte = full[-1]
-    if exte == "enc":    
-        filename = str(file_in)
-        filename = filename[:-4]
-        print(filename)
-        bs = AES.block_size 
-        iv = file.read(bs)
-        check = hash_password(passinput)
-        passhase = file.read(len(check))
-        data = file.read()
-        file.close()
-        os.rename(file_in, filename)
-    else:
-        messagebox.showerror(title='LỖI', message='Không phải file mã hóa!\nVui lòng chọn lại!')
-        return False
-    file = open(filename, 'wb+')
-    pass_hashed = passhase[:len(check)].decode()
+    iv = fileIn.read(bs)
+
+    cont = fileIn.read(289-33)
+    check = hash_password(passinput)
+    pass_hashed = cont[:len(check)].decode()
+
     if validate_password(passinput, pass_hashed):
       key = get_digest(pass_hashed)
       cipher = AES.new(key, AES.MODE_CBC, iv)
