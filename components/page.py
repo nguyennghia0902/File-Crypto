@@ -10,6 +10,7 @@ from components.utils import *
 window_height = 400
 window_width = 600
 
+
 def page(mainframe: tk.Frame):
 
     mainframe.children['loginframe'].forget()
